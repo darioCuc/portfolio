@@ -119,10 +119,12 @@ for (let i = 0; i < filterBtn.length; i++) {
 const form = document.querySelector("[data-form]");
 const formInputs = document.querySelectorAll("[data-form-input]");
 const formBtn = document.querySelector("[data-form-btn]");
+const formMessage = document.querySelector("[data-form-message]");
 
 // add event to all form input field
 for (let i = 0; i < formInputs.length; i++) {
   formInputs[i].addEventListener("input", function () {
+    if (formMessage) formMessage.textContent = "";
     if (form.checkValidity()) {
       formBtn.removeAttribute("disabled");
     } else {
@@ -131,10 +133,19 @@ for (let i = 0; i < formInputs.length; i++) {
   });
 }
 
+// Show form status message (on-page, accessible)
+function showFormMessage(message, isError) {
+  if (!formMessage) return;
+  formMessage.textContent = message;
+  formMessage.classList.remove("form-message--success", "form-message--error");
+  formMessage.classList.add(isError ? "form-message--error" : "form-message--success");
+}
+
 // Handle form submission
 form.addEventListener('submit', function(e) {
   e.preventDefault();
-  
+  if (formMessage) formMessage.textContent = "";
+
   // Show loading state
   formBtn.disabled = true;
   formBtn.querySelector('span').textContent = 'Sending...';
@@ -149,15 +160,13 @@ form.addEventListener('submit', function(e) {
   // Send email using EmailJS
   emailjs.send("service_36vlsd9", "template_b2jb9e6", templateParams).then(
     function () {
-      // Show success message
-      alert("Message sent successfully!");
+      showFormMessage("Message sent successfully! I'll get back to you soon.");
       form.reset();
       formBtn.querySelector("span").textContent = "Send Message";
       formBtn.disabled = true;
     },
     function (error) {
-      // Show error message
-      alert("Failed to send message. Please try again.");
+      showFormMessage("Failed to send message. Please try again or email me directly.");
       formBtn.disabled = false;
       formBtn.querySelector("span").textContent = "Send Message";
     }
